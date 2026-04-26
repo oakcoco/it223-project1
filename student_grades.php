@@ -15,14 +15,15 @@
         </div>
         <nav class="sidebar-nav">
             <h6 class="nav-header"> MENU</h6>
-
+    
             <a href="?page=dashboard" class="nav-item">&nbsp;&nbsp;Dashboard</a>
             <a href="?page=student_info" class="nav-item">&nbsp;&nbsp;Student Information Management</a>
             <a href="?page=student_grades" class="nav-item">&nbsp;&nbsp;Student Grade Management</a>
         </nav>
-        <footer class = "logout">
+
+        <div class = "logout">
             &nbsp;&nbsp;<a href="config/logout.php"class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> Log Out</a>
-        </footer>
+        </div>
     </aside>
 </body>
 </html>

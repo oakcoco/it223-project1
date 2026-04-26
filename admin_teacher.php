@@ -9,16 +9,13 @@ $page = $_GET['page'] ?? 'dashboard';
 
 switch ($page){
     case 'student_info':
-        include 'students_info.php';
+        include 'student_info.php';
         exit;
     case 'student_grades':
         include 'student_grades.php';
         exit;
 }
   ?>
-
-<!-- <h4 class="mb-4 fw-semibold">Student Information Management</h4>
--->
 
 <!DOCTYPE html>
 <html lang="en">

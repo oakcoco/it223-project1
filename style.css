@@ -5,7 +5,7 @@
         margin-left: 18%;
         padding: 30px;
     }
-    /* aside bar */
+    /* ASIDE */
     .sidebar{
         background: #00915c;
         color:1a1a1a;
@@ -48,12 +48,12 @@
         background: rgba(0,0,0,0.1);
     }
     .logout {
-        bottom: 90px;
-        left: 150px;
-        padding: 175% 20px 20px;
+        position: absolute;
+        bottom: 20px;
+        padding: 10px 20px;
     }
 
-    /* cards within main contenet */
+    /* DASHBOARD CARDS */
     .card-metric{
         border: none;
         border-radius: 12px;
