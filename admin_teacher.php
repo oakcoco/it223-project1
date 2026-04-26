@@ -8,15 +8,13 @@
 $page = $_GET['page'] ?? 'dashboard';
 
 switch ($page){
-    // student info management                         
     case 'student_info':
-        header("Location:student_info.php");
+        include 'students_info.php';
         exit;
-    // student grades management
     case 'student_grades':
-        header("Location: student_grades.php");
+        include 'student_grades.php';
         exit;
-} 
+}
   ?>
 
 <!-- <h4 class="mb-4 fw-semibold">Student Information Management</h4>
