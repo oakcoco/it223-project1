@@ -4,9 +4,23 @@
       header("Location: login.php");
       exit;
   }
-  $page = $_GET['page'] ?? 'dashboard'; 
+  
+$page = $_GET['page'] ?? 'dashboard';
+
+switch ($page){
+    // student info management                         
+    case 'student_info':
+        header("Location:student_info.php");
+        exit;
+    // student grades management
+    case 'student_grades':
+        header("Location: student_grades.php");
+        exit;
+} 
   ?>
 
+<!-- <h4 class="mb-4 fw-semibold">Student Information Management</h4>
+-->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,147 +30,7 @@
     <title>Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"> 
-
-<style>
-    body{
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, 'Ubuntu', Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    }
-    .main-content{
-        margin-left: 18%;
-        padding: 30px;
-    }
-    /* aside */
-    .sidebar{
-        background: #00915c;
-        color:1a1a1a;
-        width: 18%;
-        height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-    }
-    .greetings{
-        font-size: large;
-        color: white;
-        padding: 5px;
-        align-items: center;
-        padding: 20px 20px 40px;
-        border-bottom: 1px solid rgba(0,0,0,0.2);
-    }
-    .nav-header{
-        padding: 10px 20px 5px;
-        font-size: 0.75rem;
-        color: #ffffffbb;
-    }
-    .nav-item {
-        display: block;
-        padding: 15px 20px;
-        text-decoration: none;
-        color:white;
-        border-top: 1px solid rgba(0,0,0,0.2);
-        border-bottom: 1px solid rgba(0,0,0,0.2);
-    }
-
-    .nav-item:nth-child(3) {
-        border: none;
-    }
-    .nav-item:last-child {
-        border-top: 1px solid rgba(0,0,0,0.2);
-        border-bottom: 1px solid rgba(0,0,0,0.2);
-    }
-    .nav-item:hover {   
-        background: rgba(0,0,0,0.1);
-    }
-    .logout {
-        bottom: 90px;
-        left: 150px;
-        padding: 175% 20px 20px;
-    }
-
-    /* cards within main contenet */
-    .card-metric{
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        transition: transform 0.2s;
-    }
-    .card-metric .card-body{
-        padding: 25px;
-    }
-    .card-metric .icon-box{
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-    .card-students .icon-box{
-        background: #e3f9ff;
-        color: #00915c;
-    }
-    .card-failed .icon-box{
-        background: #ffe3e3;
-        color: #dc3545;
-    }
-    .card-subjects .icon-box{
-        background: #fff3e3;
-        color: #fd7e14;
-    }
-    .total-students{
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1a1a1a;
-    }
-    .metric-label{
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin-top: 5px;
-    }
-    .section-title{
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin-bottom: 15px;
-    }
-    .activity-item{
-        display: flex;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    .activity-item:last-child{
-        border-bottom: none;
-    }
-    .activity-icon{
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-        font-size: 1rem;
-    }
-    .activity-content{
-        flex: 1;
-    }
-    .activity-text{
-        font-size: 0.9rem;
-        color: #1a1a1a;
-        margin-bottom: 2px;
-    }
-    .activity-time{
-        font-size: 0.75rem;
-        color: #adb5bd;
-    }
-    .badge-activity{
-        font-size: 0.7rem;
-        padding: 4px 8px;
-    }
-
-</style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <aside class="sidebar" id="sidebar">
@@ -179,18 +53,9 @@
     <!-- content choose logic -->
     <main class="main-content">
         <div class="container-fluid">
-            <?php switch($page): 
-                    case 'student_info': ?>              
-                     <h4 class="mb-4 fw-semibold">Student Information Management</h4>                                                   
-                    <p>Student information content goes here.</p>         
-             <?php break;  
-                    case 'student_grades': ?>                  
-                     <h4 class="mb-4 fw-semibold">Student Grade Management</h4>                                                           
-                     <p>Student grades content goes here.</p>              
-                <?php break; 
-                    default: ?>
-            <h4 class="mb-4 fw-semibold">Dashboard</h4>
 
+            <!-- dashboard default landing -->
+            <h4 class="mb-4 fw-semibold">Dashboard</h4>
         
             <!-- upper cards for dashboard  -->
             <div class="row g-4 mb-4">
@@ -291,7 +156,6 @@
                     </div>
                 </div>
             </div>
-             <?php endswitch; ?>
         </div>
     </main>
 </body>
