@@ -3,8 +3,12 @@
   if (!isset($_SESSION["admin"])) {
       header("Location: login.php");
       exit;
-  }
+      }  
+    //   header("Pragma: no-cache");
+    //   header("Expires: 0");
+    //   header("Cache-Control: no-cache, no-store, must-revalidate");
 
+  
 include 'config/db_connection.php';
 $totalStudents = $conn -> query("SELECT COUNT(*) as count FROM students") -> fetch_assoc()['count'];
 $totalSubjects =  $conn -> query("SELECT COUNT(*) as count FROM subjects") -> fetch_assoc()['count'];
