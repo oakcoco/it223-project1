@@ -1,7 +1,6 @@
 <?php
 session_start();
 include "config/db_connection.php";
-  
 
 
 if($_SERVER["REQUEST_METHOD"] === "POST"){
@@ -19,17 +18,19 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
     if(!$row){
         //no user found
         header("Location:login.php");
+        mysqli_free_result($result);
         exit;
-    } elseif(password_verify($password, $row["password"])){
+    } 
+    elseif(password_verify($password, $row["password"])){
         $_SESSION["admin"] = $username;
         header("Location:admin_teacher.php");
         exit;
-    } else{
+    } 
+    else{
         header("Location: login.php");
         //remove the data inside $result https://php.net/manual/en/mysqli-result.free.php
         exit;
     }
-        mysqli_free_result($result);
 }        
     
 ?>

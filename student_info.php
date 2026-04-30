@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (!isset($_SESSION["admin"])) {
+    header("Location: login.php");
+    exit;
+    } 
 include 'config/db_connection.php';
 
 //for sort
@@ -7,6 +12,7 @@ $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
 
 $sql = "SELECT * FROM students WHERE 1=1";
 $params = [];
+$types = '';
 
 if ($search !== '') {
     $search_term = '%' . $conn->real_escape_string($search) . '%';
@@ -15,6 +21,7 @@ if ($search !== '') {
     $params[] = $search_term;
     $params[] = $search_term;
     $params[] = $search_term;
+    $types = 'ssss';
 }
 
 $order_by = 'last_name ASC';
@@ -30,23 +37,23 @@ if ($sort === 'name') {
 $sql .= " ORDER BY " . $order_by;
 
 if (count($params) > 0) {
-    $types = str_repeat('s', count($params));
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-    $students = $stmt->get_result();
+    $statement = $conn->prepare($sql);
+    $statement->bind_param($types, ...$params);
+    $statement->execute();
+    $students = $statement->get_result();
 } else {
     $students = $conn->query($sql);
 }
+
 //for delete
 if (isset($_GET['delete'])) {
     $id = (int) $_GET['delete'];
-    $stmt = $conn->prepare("DELETE FROM students WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
+    $conn->query("DELETE FROM grades WHERE student_id = $id");
+    $conn->query("DELETE FROM students WHERE id = $id");
     header("Location: student_info.php?success=1");
     exit();
 }
+
 //for update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -64,15 +71,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $grade_level = (int) trim($_POST['grade_level']);
-        if ($grade_level <= 1 || $grade_level >= 12) {
+        if ($grade_level < 1 || $grade_level > 12) {
             header("Location: student_info.php?error=invalid_grade");
             exit();
         }
 
-        $stmt = $conn->prepare("UPDATE students SET first_name=?, middle_name=?, last_name=?, email=?, grade_level=? WHERE id=?");
-        $stmt->bind_param("ssssii", $first_name, $middle_name, $last_name, $email, $grade_level, $student_id);
-        $stmt->execute();
-        $stmt->close();
+        $age = (int) trim($_POST['age']);
+        if ($age <= 3 || $age >= 90){
+          header("Location:student_info.php?error=invalid_age");
+          exit();
+        }
+
+        $sex = trim($_POST['sex']);
+        if ($sex != "Male" && $sex != "Female" && $sex != "Others"){
+          header("Location:student_info.php?error=invalid_sex");
+          exit;
+        }
+        $address = trim($_POST['address']);
+
+        $statement = $conn->prepare("UPDATE students SET first_name=?, middle_name=?, last_name=?, email=?, grade_level=?, age=?, sex=?, address=? WHERE id=?");
+        $statement->bind_param("ssssiissi", $first_name, $middle_name, $last_name, $email, $grade_level, $age, $sex, $address, $student_id);
+        $statement->execute();
+        $statement->close();
         header("Location: student_info.php?success=1");
         exit();
     }
@@ -82,25 +102,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $first_name =   trim($_POST['first_name']);
         $middle_name =  trim($_POST['middle_name']);
         $last_name =    trim($_POST['last_name']);
+        $email =        trim($_POST['email']);
+        $grade_level =  (int) trim($_POST['grade_level']);
+        $age =          trim($_POST['age']);
+        $sex =          trim($_POST['sex']);
+        $address =      trim($_POST['address']);
+        
 
-        $email = trim($_POST['email']);
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            header("Location: student_info.php?error=invalid_email");
-            exit();
-        }
+        $statement = $conn->prepare
+        ("INSERT INTO students (first_name, middle_name, last_name, email, grade_level, age, sex, address)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
-        $grade_level = (int) trim($_POST['grade_level']);
-        if ($grade_level <= 1 || $grade_level >= 12) {
-            header("Location: student_info.php?error=invalid_grade");
-            exit();
-        }
-
-        $statement = $conn->prepare("INSERT INTO students (first_name, middle_name, last_name, email, grade_level)
-        VALUES (?, ?, ?, ?, ?)");
-
-        $statement->bind_param("ssssi", $first_name, $middle_name, $last_name, $email, $grade_level);
+        $statement->bind_param("ssssiiss", $first_name, $middle_name, $last_name, $email, $grade_level, $age, $sex, $address);
         $statement->execute();
         $statement->close();
+
         header("Location: student_info.php?success=1");
         exit();
     }
@@ -125,10 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <nav class="sidebar-nav">
             <h6 class="nav-header"> MENU</h6>
-
-            <a href="?page=dashboard" class="nav-item">&nbsp;&nbsp;Dashboard</a>
-            <a href="?page=student_info" class="nav-item">&nbsp;&nbsp;Student Information Management</a>
-            <a href="?page=student_grades" class="nav-item">&nbsp;&nbsp;Student Grade Management</a>
+            <a href="admin_teacher.php" class="nav-item">&nbsp;&nbsp;Dashboard</a>
+            <a href="student_info.php" class="nav-item">&nbsp;&nbsp;Student Information Management</a>
+            <a href="student_grades.php" class="nav-item">&nbsp;&nbsp;Student Grade Management</a>
         </nav>
         <div class = "logout">
             &nbsp;&nbsp;<a href="config/logout.php"class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> Log Out</a>
@@ -138,33 +153,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <main class = "main-content">
         <div class = "container-fluid">
             <h4 class="mb-4 fw-semibold">Student Information Management <br><br></h4>
-                
-                <div class="row mb-3 g-2 align-items-center">
+
+                <?php if (isset($_GET['error'])): ?>
+                    <?php
+                    $error_msgs = [
+                        'invalid_email' => 'Invalid email format. Please try again.',
+                        'invalid_grade' => 'Grade level must be between 1 and 12.',
+                        'invalid_age' => 'Age must be between 3 and 90.',
+                        'invalid_sex' => 'Sex must be Male, Female, or Others.',
+                    ];
+                    $error_msg = $error_msgs[$_GET['error']] ?? 'Invalid input. Please try again.';
+                    ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <?php echo $error_msg; ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php elseif (isset($_GET['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Student record updated/added successfully.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+
+                <form method="GET" class="d-flex gap-2 align-items-center mb-3">
                     <div class="col">
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0">
                             <i class="bi bi-search"></i>
                             </span>
-                            <input type="text" class="form-control border-start-0 ps-0" 
-                            placeholder="Search students...">
+                            <input type="text" name="search" class="form-control border-start-0 ps-0"
+                            placeholder="Search students..." value="<?php echo htmlspecialchars($search); ?>">
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <select class="form-select">
-                            <option selected disabled>Sort by</option>
-                            <option value="name">Name (Alphabetical)</option>
-                            <option value="id">Student ID (Specific)</option>
-                            <option value="grade">Average Grade (Ascending)</option>
-                            <option value="grade">Average Grade (Descending)</option>
+                    <div class="d-flex gap-2 align-items-center">
+                        <select name="sort" class="form-select" onchange="this.form.submit()">
+                            <option value="">Sort by</option>
+                            <option value="name" <?php if ($sort === 'name') echo 'selected'; ?>>Name (Alphabetical)</option>
+                            <option value="id" <?php if ($sort === 'id') echo 'selected'; ?>>Student ID (Specific)</option>
+                            <option value="grade_asc" <?php if ($sort === 'grade_asc') echo 'selected'; ?>>Average Grade (Ascending)</option>
+                            <option value="grade_desc" <?php if ($sort === 'grade_desc') echo 'selected'; ?>>Average Grade (Descending)</option>
                         </select>
+                        <div class="col-auto">
+                        <a href="student_info.php" class="btn btn-primary">Show All Students</a>
+                        </div>
                     </div>
-                </div>
+                </form>
                 
             <div class="student-info-card">   
                 <div class="card student-container">
                     <div class="card-body">
-
-                        <!-- ADD STUDENT BUTTON PAGE LINKING NOT YET FIXED -->
                         <div class="title-side d-flex justify-content-between align-items-center">
                             <h6 class="card-title mb-4"><br>My Students:</h6>                   
                             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStudentModal">
@@ -172,7 +209,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </button>
                         </div>
                         
-                        <?php while ($studentName = $students->fetch_assoc()): ?>
+                        <?php if (isset($students) && $students instanceof mysqli_result && $students->num_rows > 0): ?>
+                        <?php while ($studentName = $students->fetch_assoc()): ?>        
                         
                         <div class="d-flex align-items-center mb-3 p-3 border rounded">
                             
@@ -202,6 +240,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     data-last="<?php echo htmlspecialchars($studentName['last_name']); ?>"
                                     data-email="<?php echo htmlspecialchars($studentName['email']); ?>"
                                     data-grade="<?php echo $studentName['grade_level']; ?>"
+                                    data-age="<?php echo  htmlspecialchars($studentName['age']); ?>"
+                                    data-sex="<?php echo htmlspecialchars($studentName['sex']); ?>"
+                                    data-address="<?php echo htmlspecialchars($studentName['address']); ?>"
                                     data-bs-toggle="modal" data-bs-target="#viewStudentModal">
                                     <i class="bi bi-eye"></i> View
                                 </button>
@@ -212,6 +253,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     data-last="<?php echo htmlspecialchars($studentName['last_name']); ?>"
                                     data-email="<?php echo htmlspecialchars($studentName['email']); ?>"
                                     data-grade="<?php echo $studentName['grade_level']; ?>"
+                                    data-age="<?php echo htmlspecialchars($studentName['age']); ?>"
+                                    data-sex="<?php echo htmlspecialchars($studentName['sex']); ?>"
+                                    data-address="<?php echo htmlspecialchars($studentName['address']); ?>"
                                     data-bs-toggle="modal" data-bs-target="#editStudentModal">
                                     <i class="bi bi-pencil"></i> Edit Information
                                 </button>
@@ -223,6 +267,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
                         <?php endwhile; ?>
+                        <?php else: ?>
+                            <div class="text-center text-muted p-4">No students found.</div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -238,6 +285,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('view-last-name').textContent = this.dataset.last;
             document.getElementById('view-email').textContent = this.dataset.email;
             document.getElementById('view-grade').textContent = this.dataset.grade;
+            document.getElementById('view-age').textContent = this.dataset.age;
+            document.getElementById('view-sex').textContent = this.dataset.sex;
+            document.getElementById('view-address').textContent = this.dataset.address;
+            
         });
     });
 
@@ -249,7 +300,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-last-name').value = this.dataset.last;
             document.getElementById('edit-email').value = this.dataset.email;
             document.getElementById('edit-grade').value = this.dataset.grade;
-        });
+            document.getElementById('edit-age').value = this.dataset.age;
+            document.getElementById('edit-sex').value = this.dataset.sex;
+            document.getElementById('edit-address').value = this.dataset.address;
+          });
     });
 });
 </script>
@@ -288,6 +342,18 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="col-md-6 mb-3">
             <label class="fw-semibold">Grade Level</label>
             <p class="form-control-plaintext" id="view-grade"></p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="fw-semibold">Age</label>
+            <p class="form-control-plaintext" id="view-age"></p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="fw-semibold">Sex</label>
+            <p class="form-control-plaintext" id="view-sex"></p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="fw-semibold">Address</label>
+            <p class="form-control-plaintext" id="view-address"></p>
           </div>
         </div>
       </div>
@@ -331,6 +397,23 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="col-md-6 mb-3">
               <label class="form-label">Grade Level</label>
               <input type="number" class="form-control" name="grade_level" id="edit-grade" min="1" max="12" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Age</label>
+              <input type="number" class="form-control" name="age" id="edit-age" min="3" max="90" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Sex</label>
+              <select class="form-control" name="sex" id="edit-sex" required>
+                <option value="">Select Sex</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Address</label>
+              <input type="text" class="form-control" name="address" id="edit-address" required>
             </div>
           </div>
 
@@ -383,6 +466,21 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="mb-3">
             <label class="form-label">Grade Level</label>
             <input type="number" class="form-control" name="grade_level" min="1" max="12" required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Age</label>
+            <input type="number" class="form-control" name="age" min="3" max="90" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Sex</label>
+            <input type="text" class="form-control" name="sex" pattern="^[A-Z][a-zA-Z]*$" title="First letter must be capitalized Male, Female, Others only" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <input type="text" class="form-control" name="address" required>
           </div>
 
           <div class="modal-footer px-0 pb-0">

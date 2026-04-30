@@ -1,35 +1,24 @@
 <?php
-  session_start();
-  if (!isset($_SESSION["admin"])) {
-      header("Location: login.php");
-      exit;
-      }  
-    //   header("Pragma: no-cache");
-    //   header("Expires: 0");
-    //   header("Cache-Control: no-cache, no-store, must-revalidate");
+session_start();
+if (!isset($_SESSION["admin"])) {
+    header("Location: login.php");
+    exit;
+    }  
 
-  
 include 'config/db_connection.php';
 $totalStudents = $conn -> query("SELECT COUNT(*) as count FROM students") -> fetch_assoc()['count'];
 $totalSubjects =  $conn -> query("SELECT COUNT(*) as count FROM subjects") -> fetch_assoc()['count'];
 
-//vvv STILL ON DEVELOPMENT VVV
-// $studentsFailed = $conn->query("SELECT COUNT(DISTINCT student_id) as count FROM grades WHERE grade <
-//   75")->fetch_assoc()['count'];
+// Compute average per student and count those with average < 75
+$avgResult = $conn->query("
+    SELECT student_id, AVG(grade) as avg_grade
+    FROM grades
+    GROUP BY student_id
+    HAVING avg_grade < 75
+");
 
+$studentsFailed = $avgResult->num_rows;
 
-
-  
-$page = $_GET['page'] ?? 'dashboard';
-
-switch ($page){
-    case 'student_info':
-        include 'student_info.php';
-        exit;
-    case 'student_grades':
-        include 'student_grades.php';
-        exit;
-}
 ?>
 
 <!DOCTYPE html>
@@ -50,10 +39,9 @@ switch ($page){
         </div>
         <nav class="sidebar-nav">
             <h6 class="nav-header"> MENU</h6>
-
-            <a href="?page=dashboard" class="nav-item">&nbsp;&nbsp;Dashboard</a>
-            <a href="?page=student_info" class="nav-item">&nbsp;&nbsp;Student Information Management</a>
-            <a href="?page=student_grades" class="nav-item">&nbsp;&nbsp;Student Grade Management</a>
+            <a href="admin_teacher.php" class="nav-item">&nbsp;&nbsp;Dashboard</a>
+            <a href="student_info.php" class="nav-item">&nbsp;&nbsp;Student Information Management</a>
+            <a href="student_grades.php" class="nav-item">&nbsp;&nbsp;Student Grade Management</a>
         </nav>
         <footer class = "logout">
             &nbsp;&nbsp;<a href="config/logout.php"class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> Log Out</a>
@@ -91,8 +79,8 @@ switch ($page){
                                 <i class="bi bi-exclamation-triangle-fill"></i>
                             </div>
                             <div>
-                                <div class="total-students">NOT WORKING Line 12 to 14</div>
-                                <div class="metric-label">Students with Failed Grade</div>
+                                <div class="total-students"><?php echo $studentsFailed ?></div>
+                                <div class="metric-label">Students with Failing Average</div>
                             </div>
                         </div>
                     </div>
@@ -109,71 +97,6 @@ switch ($page){
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- recent activity -->
-            <div class="card card-metric">
-                <div class="card-body">
-                    <h6 class="section-title">Recent Activity (not working)</h6>
-                    <div class="activity-item">
-
-                        <div class="activity-icon" style="background:#e3f9ff;color:#00915c;">
-                            <i class="bi bi-pencil-square"></i>
-                        </div>
-
-                        <div class="activity-content">
-                            <div class="activity-text">Maria Garcia submitted grades for Mathematics</div>
-                            <div class="activity-time">2 hours ago</div>
-                        </div>
-                        <span class="badge bg-success badge-activity">Completed</span>
-
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background:#fff3e3;color:#fd7e14;">
-                            <i class="bi bi-person-plus-fill"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">James Wilson enrolled in Science class</div>
-                            <div class="activity-time">4 hours ago</div>
-                        </div>
-                        <span class="badge bg-primary badge-activity">New</span>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background:#ffe3e3;color:#dc3545;">
-                            <i class="bi bi-exclamation-circle-fill"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">20 students failed in History exam</div>
-                            <div class="activity-time">Yesterday, 3:45 PM</div>
-                        </div>
-                        <span class="badge bg-danger badge-activity">Alert</span>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background:#e3f9ff;color:#00915c;">
-                            <i class="bi bi-check-circle-fill"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">Class section B completed all assessments</div>
-                            <div class="activity-time">Yesterday, 11:20 AM</div>
-                        </div>
-                        <span class="badge bg-success badge-activity">Done</span>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background:#fff3e3;color:#fd7e14;">
-                            <i class="bi bi-calendar-event-fill"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">New quiz scheduled for English class</div>
-                            <div class="activity-time">2 days ago</div>
-                        </div>
-                        <span class="badge bg-warning text-dark badge-activity">Scheduled</span>
-                    </div>
-                    
                 </div>
             </div>
         </div>
