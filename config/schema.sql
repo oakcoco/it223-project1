@@ -23,6 +23,9 @@ CREATE TABLE IF NOT EXISTS students (
 `last_name` VARCHAR(50) NOT NULL,
 `email` VARCHAR(100) UNIQUE NOT NULL,
 `grade_level` VARCHAR(20) NOT NULL,
+`age` INT NOT NULL,
+`sex` ENUM('Male', 'Female','Others') NOT NULL,
+`address` TEXT NOT NULL,
 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -36,19 +39,6 @@ FOREIGN KEY (student_id) REFERENCES students(id),
 FOREIGN KEY (subject_id) REFERENCES subjects(id),
 UNIQUE KEY unique_grade (student_id, subject_id, grade_level)
 );
-
-CREATE TABLE IF NOT EXISTS activities (                                                                         
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    user_name VARCHAR(100) NOT NULL,
-    action VARCHAR(255) NOT NULL,
-    details VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-ALTER TABLE `students`
-    ADD COLUMN `age` INT NOT NULL,
-    ADD COLUMN `sex`     ENUM('Male', 'Female', 'Others') NOT NULL AFTER `grade_level`,
-    ADD COLUMN `address` TEXT NOT NULL AFTER `sex`;
 
 INSERT INTO `admin` (`id`, `first_name`, `username`, `password`, `created_at`) VALUES
 (1, 'admin', 'admin', '$2a$12$4gFiHGreq2GuiITdD5.bPODonA6lbm0nwOjyOSuuVTFHsR1QamHSW', '2026-04-25 01:30:45');

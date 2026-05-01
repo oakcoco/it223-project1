@@ -9,7 +9,6 @@ include 'config/db_connection.php';
 $totalStudents = $conn -> query("SELECT COUNT(*) as count FROM students") -> fetch_assoc()['count'];
 $totalSubjects =  $conn -> query("SELECT COUNT(*) as count FROM subjects") -> fetch_assoc()['count'];
 
-// Compute average per student and count those with average < 75
 $avgResult = $conn->query("
     SELECT student_id, AVG(grade) as avg_grade
     FROM grades
@@ -34,8 +33,7 @@ $studentsFailed = $avgResult->num_rows;
 <body>
     <aside class="sidebar" id="sidebar">
         <div class = "greetings">
-            <!-- make this update with the system -->
-             <h5>Goodmorning Teacher!</h5>
+             <h5>Student Information and Grade Management</h5>
         </div>
         <nav class="sidebar-nav">
             <h6 class="nav-header"> MENU</h6>
@@ -47,8 +45,7 @@ $studentsFailed = $avgResult->num_rows;
             &nbsp;&nbsp;<a href="config/logout.php"class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> Log Out</a>
         </footer>
     </aside>
-    
-    <!-- content choose logic -->
+
     <main class="main-content">
         <div class="container-fluid">
 

@@ -16,8 +16,7 @@
         left: 0;
     }
     .greetings{
-        font-size: large;
-        color: white;
+        color: #ffe3e3 !important;
         padding: 5px;
         align-items: center;
         padding: 20px 20px 40px;
@@ -94,48 +93,7 @@
         color: #6c757d;
         margin-top: 5px;
     }
-    .section-title{
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin-bottom: 15px;
-    }
-    .activity-item{
-        display: flex;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    .activity-item:last-child{
-        border-bottom: none;
-    }
-    .activity-icon{
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-        font-size: 1rem;
-    }
-    .activity-content{
-        flex: 1;
-    }
-    .activity-text{
-        font-size: 0.9rem;
-        color: #1a1a1a;
-        margin-bottom: 2px;
-    }
-    .activity-time{
-        font-size: 0.75rem;
-        color: #adb5bd;
-    }
-    .badge-activity{
-        font-size: 0.7rem;
-        padding: 4px 8px;
-    }
-
+    
     /* STUDENT INFORMATION */
     .student-container{
         border: none;

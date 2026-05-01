@@ -9,12 +9,9 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password']?? '';
     $result = mysqli_query($conn, "SELECT * FROM admin WHERE username = '$username'");
-    
-    //fetching the actual data https://php.net/manual/en/mysqli-result.fetch-assoc.php
     $row = mysqli_fetch_assoc($result);    
 
 
-    // password input by user on page, hashed password from server.
     if(!$row){
         //no user found
         header("Location:login.php");
@@ -28,7 +25,6 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
     } 
     else{
         header("Location: login.php");
-        //remove the data inside $result https://php.net/manual/en/mysqli-result.free.php
         exit;
     }
 }        
@@ -133,8 +129,6 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 </style>
 <body>
     <div class="form-container">
-        <!-- put backend logic here at form action -->
-        <!-- < form action="" method="POST" > -->
         <form  action="login.php" method="POST">
             <ul>
                 <div class="inside-form-container">
@@ -142,7 +136,6 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                         <img src="assets/School-PNG-Picture.png" alt="logo" width="100px" height="100px">
                         <h1>Student Management & Grade Analysis System</h1>                    
                     </div>
-                        <!-- put goodmorning, afternoon, evening here based on time of day -->
                         <h3 class="login">Welcome!</h3>
                     <div class="form-group">
                             <label for="username">Username:</label>
